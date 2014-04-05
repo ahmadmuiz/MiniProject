@@ -16,8 +16,8 @@
     @* custom theming/styles *@
     @Styles.Render("~/Content/css/bootstrap")
     @Styles.Render("~/Content/css/font-awesome")
-    @Styles.Render("~/Content/css/sbadmin")
-
+    @Styles.Render("~/Content/css/sbadmin")    
+    <script type="text/javascript" src="/Scripts/kaskus_md5.js" ></script>
 </head>
 <body>
     <div class="container">
@@ -25,10 +25,10 @@
             <div class="col-md-4 col-md-offset-4">
                 <div class="login-panel panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Login Page</h3>
+                        <h3 class="panel-title">Kaskus Login Page</h3>
                     </div>
                     <div class="panel-body">
-                        <form role="form" action="@Url.Action("Login", "Home")" method="post">
+                        <form role="form" action="@Url.Action("Login", "Home")" method="post" onsubmit="md5hash(password, md5password, md5password_utf, 0);">
                             <fieldset>
                                 <div class="form-group">
                                     <input class="form-control" placeholder="Username" name="username" type="text" autofocus>
@@ -36,11 +36,13 @@
                                 <div class="form-group">
                                     <input class="form-control" placeholder="Password" name="password" type="password" value="">
                                 </div>
-                                @*<div class="checkbox">
-                                    <label>
-                                        <input name="remember" type="checkbox" value="Remember Me">Remember Me
-                                    </label>
-                                </div>*@
+                                <div class="form-group">Kaskus Security Tokens
+                                    <input class="form-control" placeholder="Kaskus Security Token" name="securitytoken" type="text" autofocus>
+                                </div>
+                                <input name="url" id="url" type="hidden" value="/">
+                                <input type="hidden" name="md5password">
+                                <input type="hidden" name="md5password_utf">
+                                <input type="checkbox" value="1" name="rememberme">
                                 <!-- Change this to a button or input when using this as a form -->
                                 <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
                             </fieldset>

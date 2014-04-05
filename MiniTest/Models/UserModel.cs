@@ -10,5 +10,9 @@ namespace MiniTest.Models
         public long Id { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string SecurityToken { get; set; }
+        public string url { get; set; }
+        public string MD5Password { get; set; }
+        public string MD5Password_UTF { get; set; }
     }
 }
