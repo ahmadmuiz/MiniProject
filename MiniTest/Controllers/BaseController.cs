@@ -23,15 +23,30 @@ namespace MiniTest.Controllers
             }
         }
 
-        protected bool IsAdministrator
+        protected string ApplicationId
         {
             get
             {
-                return false;
+                if (Session["ApplicationId"] == null) return string.Empty;
+                return Session["ApplicationId"].ToString();
             }
             set
             {
+                Session["ApplicationId"] = value;
+            }
+        }
 
+
+        protected bool IsAuthenticated
+        {
+            get
+            {
+                if (Session["IsAuthenticated"] == null) return false;
+                return Convert.ToBoolean( Session["IsAuthenticated"].ToString());
+            }
+            set
+            {
+                Session["IsAuthenticated"] = value;
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace SONY.PSI.Web
+namespace MniTest
 {
     public class BundleConfig
     {

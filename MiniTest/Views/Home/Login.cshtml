@@ -2,16 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Mini Project</title>
+    <title> Mini Project</title>
     <meta http-equiv="cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    @*<meta http-equiv="X-UA-Compatible" content="IE=edge" />*@
     @*<meta http-equiv="x-ua-compatible" content="IE=8">*@
     @*<meta http-equiv="X-UA-Compatible" content="IE=9" />*@
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width" />
+    @*@Styles.Render("~/Content/css")
+        @Scripts.Render("~/bundles/modernizr")*@
 
     @* custom theming/styles *@
-    @Styles.Render("~/Content/css/css")
+    @Styles.Render("~/Content/css/bootstrap")
     @Styles.Render("~/Content/css/font-awesome")
     @Styles.Render("~/Content/css/sbadmin")
 
@@ -58,6 +61,6 @@
     @* custom theming / scripts *@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
-    @*@Scripts.Render("~/bundles/addin")*@
+    @Scripts.Render("~/bundles/addin")
 </body>
 </html>
