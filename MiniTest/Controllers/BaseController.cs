@@ -5,6 +5,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
+using HtmlAgilityPack;
 
 namespace MiniTest.Controllers
 {
@@ -42,7 +43,7 @@ namespace MiniTest.Controllers
 
 
         /// <summary>
-        /// Parse nt well-formatted cookie, see http://stackoverflow.com/questions/15103513/httpwebresponse-cookies-empty-despite-set-cookie-header-no-redirect
+        /// Parse  not well-formatted cookie, see http://stackoverflow.com/questions/15103513/httpwebresponse-cookies-empty-despite-set-cookie-header-no-redirect
         /// </summary>
         /// <param name="cookie"></param>
         /// <returns></returns>
@@ -113,6 +114,28 @@ namespace MiniTest.Controllers
             {
                 Session["IsAuthenticated"] = value;
             }
+        }
+
+        /// <summary>
+        /// get security token from kaskus, use htmlagility
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        protected string GetSecurityToken(string url)
+        {
+            HtmlWeb Web = new HtmlWeb();
+            HtmlDocument Doc = Web.Load(url);
+            Doc.OptionOutputAsXml = true;
+            Doc.OptionAutoCloseOnEnd = true;
+            Doc.OptionDefaultStreamEncoding = System.Text.Encoding.UTF8;
+            //get security token element
+            HtmlNodeCollection node;
+            node = Doc.DocumentNode.SelectNodes("//input[./@name=\"securitytoken\"]");
+            if (node != null && node.Count > 0)
+            {
+                return node.First().Attributes["value"].Value;
+            }
+            return string.Empty;
         }
 
     }

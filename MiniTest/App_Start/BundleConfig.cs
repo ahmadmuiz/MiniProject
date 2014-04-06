@@ -28,8 +28,8 @@ namespace MniTest
 
             bundles.Add(new ScriptBundle("~/bundles/addin").Include(
                         "~/Scripts/jquery-metisMenu.js",
-                        "~/Scripts/morris.js",
-                        "~/Scripts/dashboard-demo.js",
+                        //"~/Scripts/morris.js",
+                        //"~/Scripts/dashboard-demo.js",
                         "~/Scripts/raphael-2.1.0.min.js",
                         "~/Scripts/sb-admin.js"));
 

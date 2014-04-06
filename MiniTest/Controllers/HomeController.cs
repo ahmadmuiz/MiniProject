@@ -30,7 +30,7 @@ namespace MiniTest.Controllers
         [HttpPost, SessionExpireFilter]
         public ActionResult SendMessage(string message)
         {
-            SendMessage(@"http://www.kaskus.co.id/user/editprofile", "12", message);
+            SendKaskusMessage( message);
             return RedirectToAction("Index");
         }
 
@@ -46,7 +46,7 @@ namespace MiniTest.Controllers
             try
             {
                 if (string.IsNullOrEmpty(username)) throw new Exception("Please fill username.");
-                bool checkAuth = Login(@"https://www.kaskus.co.id/user/login", username, password, "1396676221-46ebb6e13bee896959eaeb49ea341150", @"/", "59513df1d1602cd98937563a63d38f5b", "59513df1d1602cd98937563a63d38f5b");
+                bool checkAuth = Login(@"https://www.kaskus.co.id/user/login", username, password, securitytoken, url, md5password, md5password_utf);
                 if (checkAuth)
                 {
                     IsAuthenticated = true;
@@ -77,6 +77,13 @@ namespace MiniTest.Controllers
             Session.RemoveAll();
             Session.Abandon();
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public ActionResult Token()
+        {
+            string token = GetSecurityToken(@"http://www.kaskus.co.id/");
+            return Json(token, JsonRequestBehavior.AllowGet);
         }
 
 
@@ -114,7 +121,7 @@ namespace MiniTest.Controllers
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    Cookies =  parseCookie(request, response.Headers);
+                    Cookies = parseCookie(request, response.Headers);
                     using (StreamReader reader = new StreamReader(response.GetResponseStream()))
                     {
                         result = reader.ReadToEnd();
@@ -139,8 +146,39 @@ namespace MiniTest.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="message"></param>
-        private void SendMessage(string url, string id, string message)
+        private void SendKaskusMessage( string message)
         {
+            string thread_id = "5340bf8b1f0bc31f3c8b4587";
+            string securityToken = GetSecurityToken(string.Format(@"http://www.kaskus.co.id/post_reply/{0}", thread_id));
+            //string securityToken = "1396752325-3896ebf16681e638671de7b81b9f73f2";
+            string title = "Just Testing";
+            string ajaxhref = @"/misc/getsmilies";
+            string iconid = "0";
+            string humanverify_hash = "00eed173f0576194f6de4757902a5f78";
+            string recaptcha_challenge_field = "03AHJ_Vuuqt-9Tind3En47OcUcnjbcZkU5g9tiwBWh0UTrNFNvBhwVjZZ10nBB8bLfkvcJi4HWkolcmTnUFUYb02sdUWzhUchIm4Hj8IWdEoIkC2YpCy2MgviZ3vFwbR-u3dz9mOC3a6apkaEZqHJWnMF-TEFILy3WGIe8M8IMSgExUYQ9kCp3J6Pw9dTrAJdEreAJbiCUTe6RLohZRvTi6OOkfKtQFrtjWaYibccpWByvqY_lbJVqJqY";
+            string recaptcha_response_field = "59288556";
+            string parseurl = "1";
+            string emailupdate = "9999";
+            string folderid = "0";
+            string rating = "0";
+            string sbutton = "Submit reply";
+            string url = string.Format(@"http://www.kaskus.co.id/post_reply/{0}", thread_id);
+
+            StringBuilder postData = new StringBuilder();
+            postData.Append((String.Format("securitytoken={0}&", securityToken)));
+            postData.Append((String.Format("title={0}&", title)));
+            postData.Append((String.Format("message={0}&", message)));
+            postData.Append((String.Format("ajaxhref={0}&", ajaxhref)));
+            postData.Append((String.Format("iconid={0}&", iconid)));
+            postData.Append((String.Format("humanverify[hash]={0}&", humanverify_hash)));
+            postData.Append((String.Format("recaptcha_challenge_field={0}&", recaptcha_challenge_field)));
+            postData.Append((String.Format("recaptcha_response_field={0}&", recaptcha_response_field)));
+            postData.Append((String.Format("parseurl={0}&", parseurl)));
+            postData.Append((String.Format("emailupdate={0}&", emailupdate)));
+            postData.Append((String.Format("folderid={0}&", folderid)));
+            postData.Append((String.Format("rating={0}&", rating)));
+            postData.Append((String.Format("sbutton={0}&", sbutton)));
+
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
@@ -151,17 +189,16 @@ namespace MiniTest.Controllers
                 string hash = Cookies["hash"] != null ? Cookies["hash"].Value : string.Empty;
                 string userid = Cookies["userid"] != null ? Cookies["userid"].Value : string.Empty;
                 string key = Cookies["key"] != null ? Cookies["key"].Value : string.Empty;
-                request.Headers["Cookie"] = string.Format("hash={0}; userid={1}; key={2}", hash, userid, key); 
+                request.Headers["Cookie"] = string.Format("hash={0}; userid={1}; key={2}", hash, userid, key);
             }
             //CookieContainer container = new CookieContainer();
             //container.Add(Cookies);
             //request.CookieContainer = container;
-
-            byte[] _byteVersion = Encoding.ASCII.GetBytes(string.Concat("content="));
-            request.ContentLength = _byteVersion.Length;
+            byte[] data = Encoding.ASCII.GetBytes(postData.ToString());
+            request.ContentLength = data.Length;
             using (Stream stream = request.GetRequestStream())
             {
-                stream.Write(_byteVersion, 0, _byteVersion.Length);
+                stream.Write(data, 0, data.Length);
                 stream.Close();
             }
             string result = string.Empty;
