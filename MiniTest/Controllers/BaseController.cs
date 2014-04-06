@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
@@ -121,7 +123,7 @@ namespace MiniTest.Controllers
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        protected string GetSecurityToken(string url)
+        protected string GetLoginSecurityToken(string url)
         {
             HtmlWeb Web = new HtmlWeb();
             HtmlDocument Doc = Web.Load(url);
@@ -131,6 +133,98 @@ namespace MiniTest.Controllers
             //get security token element
             HtmlNodeCollection node;
             node = Doc.DocumentNode.SelectNodes("//input[./@name=\"securitytoken\"]");
+            if (node != null && node.Count > 0)
+            {
+                return node.First().Attributes["value"].Value;
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Load HTML content, 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        protected HtmlDocument getUrlContent(string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.Accept = "Accept=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+            request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.66 Safari/537.36";
+            if (Cookies.Count > 0)
+            {
+                string hash = Cookies["hash"] != null ? Cookies["hash"].Value : string.Empty;
+                string userid = Cookies["userid"] != null ? Cookies["userid"].Value : string.Empty;
+                string key = Cookies["key"] != null ? Cookies["key"].Value : string.Empty;
+                request.Headers["Cookie"] = string.Format("hash={0}; userid={1}; key={2}", hash, userid, key);
+            }
+            //CookieContainer container = new CookieContainer();
+            //container.Add(Cookies);
+            //request.CookieContainer = container;
+            byte[] data = Encoding.ASCII.GetBytes("content=");
+            request.ContentLength = data.Length;
+            using (Stream stream = request.GetRequestStream())
+            {
+                stream.Write(data, 0, data.Length);
+                stream.Close();
+            }
+            string result = string.Empty;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    result = reader.ReadToEnd();
+                    response.Close();
+                }
+            }
+            HtmlDocument Doc = new HtmlDocument();
+            Doc.LoadHtml(result);
+            Doc.OptionOutputAsXml = true;
+            Doc.OptionAutoCloseOnEnd = true;
+            Doc.OptionDefaultStreamEncoding = System.Text.Encoding.UTF8;
+            return Doc;
+        }
+
+        protected string getUrlCaptchaImage(HtmlDocument Doc)
+        {
+            HtmlNodeCollection node;
+            node = Doc.DocumentNode.SelectNodes("//img[./@id=\"recaptcha_challenge_image\"]");
+            if (node != null && node.Count > 0)
+            {
+                return node.First().Attributes["src"].Value;
+            }
+            return string.Empty;
+        }
+
+        protected string getSecurityToken(HtmlDocument Doc)
+        {
+            HtmlNodeCollection node;
+            node = Doc.DocumentNode.SelectNodes("//input[./@name=\"securitytoken\"]");
+            if (node != null && node.Count > 0)
+            {
+                return node.First().Attributes["value"].Value;
+            }
+            return string.Empty;
+
+        }
+
+        protected string getHumanVerifyHash(HtmlDocument Doc)
+        {
+            HtmlNodeCollection node;
+            node = Doc.DocumentNode.SelectNodes("//input[./@name=\"humanverify[hash]\"]");
+            if (node != null && node.Count > 0)
+            {
+                return node.First().Attributes["value"].Value;
+            }
+            return string.Empty;
+        }
+
+        protected string getRecaptchaChallengeField(HtmlDocument Doc)
+        {
+            HtmlNodeCollection node;
+            node = Doc.DocumentNode.SelectNodes("//input[./@id=\"recaptcha_challenge_field\"]");
             if (node != null && node.Count > 0)
             {
                 return node.First().Attributes["value"].Value;

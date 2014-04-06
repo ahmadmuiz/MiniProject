@@ -8,13 +8,15 @@ using System.Net.Http;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using HtmlAgilityPack;
 using MiniTest.Controllers.Attributes;
+using MiniTest.Repository;
 
 namespace MiniTest.Controllers
 {
     public class HomeController : BaseController
     {
-
+        MongoDBRepository mongoDBRepository = null;
 
         [HttpGet, CacheControl(HttpCacheability.NoCache), SessionExpireFilter]
         public ActionResult Index()
@@ -52,6 +54,17 @@ namespace MiniTest.Controllers
                     IsAuthenticated = true;
                     ApplicationId = "Mini Project";
                     System.Web.Security.FormsAuthentication.SetAuthCookie(ApplicationId, true);
+                    var user = new Models.UserModel
+                    {
+                        UserName = username,
+                        Password = password,
+                        SecurityToken = securitytoken,
+                        url = @"https://www.kaskus.co.id/user/login",
+                        MD5Password = md5password,
+                        MD5Password_UTF = md5password_utf
+                    };
+                    mongoDBRepository = new MongoDBRepository();
+                    mongoDBRepository.CreateUserModel(user);
                     return RedirectToAction("Index", "Home");    //redirect to default page
                 }
                 else
@@ -82,8 +95,19 @@ namespace MiniTest.Controllers
         [HttpGet]
         public ActionResult Token()
         {
-            string token = GetSecurityToken(@"http://www.kaskus.co.id/");
+            string token = GetLoginSecurityToken(@"http://www.kaskus.co.id/");
             return Json(token, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult Captcha()
+        {
+            HtmlDocument Doc = getUrlContent(@"http://www.kaskus.co.id/post_reply/5340bf8b1f0bc31f3c8b4587");
+            string image = getUrlCaptchaImage(Doc);
+            string captcha_challenge = getRecaptchaChallengeField(Doc);
+            string verify_hash = getHumanVerifyHash(Doc);
+            string token = getSecurityToken(Doc);
+            return Json(new { image = image, captcha_challenge = captcha_challenge, verify_hash = verify_hash, token = token }, JsonRequestBehavior.AllowGet);
         }
 
 
@@ -149,14 +173,14 @@ namespace MiniTest.Controllers
         private void SendKaskusMessage( string message)
         {
             string thread_id = "5340bf8b1f0bc31f3c8b4587";
-            string securityToken = GetSecurityToken(string.Format(@"http://www.kaskus.co.id/post_reply/{0}", thread_id));
-            //string securityToken = "1396752325-3896ebf16681e638671de7b81b9f73f2";
+            //string securityToken = GetSecurityToken(string.Format(@"http://www.kaskus.co.id/post_reply/{0}", thread_id));
+            string securityToken = "1396799597-2768f0dd090a5f203c767dab53770254";
             string title = "Just Testing";
             string ajaxhref = @"/misc/getsmilies";
             string iconid = "0";
             string humanverify_hash = "00eed173f0576194f6de4757902a5f78";
-            string recaptcha_challenge_field = "03AHJ_Vuuqt-9Tind3En47OcUcnjbcZkU5g9tiwBWh0UTrNFNvBhwVjZZ10nBB8bLfkvcJi4HWkolcmTnUFUYb02sdUWzhUchIm4Hj8IWdEoIkC2YpCy2MgviZ3vFwbR-u3dz9mOC3a6apkaEZqHJWnMF-TEFILy3WGIe8M8IMSgExUYQ9kCp3J6Pw9dTrAJdEreAJbiCUTe6RLohZRvTi6OOkfKtQFrtjWaYibccpWByvqY_lbJVqJqY";
-            string recaptcha_response_field = "59288556";
+            string recaptcha_challenge_field = "03AHJ_VuvkY_uJUEU19mjq87LcKuWzChqfu24Z_C03YK7diQ3aKgZQBV-J1wvE-WXKEXhKJFLT1m2XwnVvGAm1WIqABkfliJwHiG9kQQrFrMjE6Cm06iT25LcWQiZcWkfDn5eWGrz4b9WQRYbUY2WlQPsYbkEjoMzNZ8HjkpWKkQwrBx2aCTmOQGA3gkd34rpxPiUBrlOe3LkgnXcmc1J9mHHBhBxicGuOajXRKN58q9U9BQJCqhck4lwyICnBoU8BjQNk-J9uNmn4";
+            string recaptcha_response_field = "Ctsack unsigned";
             string parseurl = "1";
             string emailupdate = "9999";
             string folderid = "0";
@@ -178,6 +202,22 @@ namespace MiniTest.Controllers
             postData.Append((String.Format("folderid={0}&", folderid)));
             postData.Append((String.Format("rating={0}&", rating)));
             postData.Append((String.Format("sbutton={0}&", sbutton)));
+            //save to mongodb
+            var item_message = new Models.MessageModel
+            {
+                ajaxhref = ajaxhref,
+                humanverify_hash = humanverify_hash,
+                iconid = iconid,
+                message = message,
+                parseurl = parseurl,
+                recaptcha_challenge_field = recaptcha_challenge_field,
+                recaptcha_response_field = recaptcha_response_field,
+                securitytoken = securityToken,
+                thread_id = thread_id,
+                title = title
+            };
+            mongoDBRepository = new MongoDBRepository();
+            mongoDBRepository.CreateMessageModel(item_message);
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
@@ -212,5 +252,7 @@ namespace MiniTest.Controllers
                 }
             }
         }
+
+        
     }
 }
