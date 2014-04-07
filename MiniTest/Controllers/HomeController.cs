@@ -174,13 +174,13 @@ namespace MiniTest.Controllers
         {
             string thread_id = "5340bf8b1f0bc31f3c8b4587";
             //string securityToken = GetSecurityToken(string.Format(@"http://www.kaskus.co.id/post_reply/{0}", thread_id));
-            string securityToken = "1396799597-2768f0dd090a5f203c767dab53770254";
+            string securityToken = "1396878862-77174a43f8113c15850c50e06bf6410e";
             string title = "Just Testing";
             string ajaxhref = @"/misc/getsmilies";
             string iconid = "0";
             string humanverify_hash = "00eed173f0576194f6de4757902a5f78";
-            string recaptcha_challenge_field = "03AHJ_VuvkY_uJUEU19mjq87LcKuWzChqfu24Z_C03YK7diQ3aKgZQBV-J1wvE-WXKEXhKJFLT1m2XwnVvGAm1WIqABkfliJwHiG9kQQrFrMjE6Cm06iT25LcWQiZcWkfDn5eWGrz4b9WQRYbUY2WlQPsYbkEjoMzNZ8HjkpWKkQwrBx2aCTmOQGA3gkd34rpxPiUBrlOe3LkgnXcmc1J9mHHBhBxicGuOajXRKN58q9U9BQJCqhck4lwyICnBoU8BjQNk-J9uNmn4";
-            string recaptcha_response_field = "Ctsack unsigned";
+            string recaptcha_challenge_field = "03AHJ_Vut9x4rr56TkcTdFbHu_45J0XVXc8gVgvzKyeE54ipY0IKk5se94fpjjmT5roIpsiGV0cttQgGp23gPazL6kCU4AnXsjmh7taLMaJ0fYjaPF0Fmp96NtYI3iH3C3Olk_41PQKzDr2FUwheben23A3FN3EG48nZVxBFNuxH3nX-QmfnUjBhkP3v-gFJXTpFWRWORpO38dmZgvLyJh0hedADzPgfPmOhrsv_ChG3AgJZy-pstKT5A";
+            string recaptcha_response_field = "69999498 442";
             string parseurl = "1";
             string emailupdate = "9999";
             string folderid = "0";
